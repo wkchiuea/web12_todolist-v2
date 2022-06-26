@@ -26,40 +26,40 @@ const item2 = new Item({
 const item3 = new Item({
   name: "hoho"
 });
-
 const defaultItems = [item1, item2, item3];
-
-Item.insertMany(defaultItems, function(err) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("Successfully inserted");
-  }
-});
 
 app.get("/", function(req, res) {
 
   Item.find({}, function(err, foundItems) {
-    if (err) {
-      console.log(err);
+
+    if (foundItems.length === 0) {
+      Item.insertMany(defaultItems, function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Successfully inserted");
+        }
+      });
+      res.redirect("/");
     } else {
       res.render("list", {listTitle: "Today", newListItems: foundItems});
     }
+
   });
 
 });
 
 app.post("/", function(req, res){
 
-  const item = req.body.newItem;
+  const itemName = req.body.newItem;
 
-  if (req.body.list === "Work") {
-    workItems.push(item);
-    res.redirect("/work");
-  } else {
-    items.push(item);
-    res.redirect("/");
-  }
+  const newItem = new Item({
+    name: itemName
+  });
+
+  newItem.save();
+  res.redirect("/");
+
 });
 
 app.get("/work", function(req,res){
